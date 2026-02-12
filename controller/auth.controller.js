@@ -26,6 +26,7 @@ authController.loginwithMail = async (req, res) => {
     res.status(400).json({ status: "로그인 실패", error: error.message });
   }
 };
+
 authController.authenticate = async (req, res, next) => {
   try {
     const token = req.headers.authorization.replace("Bearer ", ""); // Bearer <token>
@@ -46,4 +47,21 @@ authController.authenticate = async (req, res, next) => {
   }
 };
 
+authController.checkAdminPermission = async (req, res, next) => {
+  // 1. user의 level이 admin인지 확인
+  // 2. 맞으면 next()
+  // 3. 아니면 403 에러
+  try {
+    const { userId } = req;
+    const user = await User.findById(userId);
+    if (user?.level !== "admin") {
+      throw new Error("관리자 권한이 없습니다.");
+    }
+    next();
+  } catch (error) {
+    res
+      .status(403)
+      .json({ status: "관리자 권한이 없습니다.", error: error.message });
+  }
+};
 module.exports = authController;

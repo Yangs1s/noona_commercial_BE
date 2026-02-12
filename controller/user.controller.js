@@ -1,6 +1,6 @@
 const User = require("../model/User");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+
 const userController = {};
 
 // 유저가 존재하는지
@@ -40,12 +40,13 @@ userController.getUser = async (req, res) => {
   try {
     const { userId } = req;
     const user = await User.findById(userId).select("-password");
-    if (user) {
-      res.status(200).json({ status: "유저 조회 성공", user });
+    if (!user) {
+      throw new Error("유저를 찾을 수 없습니다.");
     }
-    throw new Error("유저를 찾을 수 없습니다.");
+    return res.status(200).json({ status: "유저 조회 성공", user });
   } catch (error) {
     res.status(400).json({ status: "유저 조회 실패", error: error.message });
   }
 };
+
 module.exports = userController;

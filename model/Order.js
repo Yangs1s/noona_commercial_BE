@@ -51,15 +51,13 @@ const orderSchema = Schema(
   { timestamps: true },
 );
 
-orderSchema.methods.toJSON = () => {
-  const obj = this._id;
+orderSchema.methods.toJSON = async function () {
+  const obj = this.toObject();
   delete obj.createdAt;
   delete obj.updatedAt;
   delete obj.password;
   delete obj.__v;
   return obj;
 };
-
-const Order = mongoose.model("Order", orderSchema);
 
 module.exports = Order;

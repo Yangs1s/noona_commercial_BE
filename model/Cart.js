@@ -29,8 +29,8 @@ const cartSchema = Schema(
   { timestamps: true },
 );
 
-cartSchema.methods.toJSON = () => {
-  const obj = this._id;
+cartSchema.methods.toJSON = async function () {
+  const obj = this.toObject();
   delete obj.createdAt;
   delete obj.updatedAt;
   delete obj.password;

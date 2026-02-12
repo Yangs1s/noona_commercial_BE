@@ -7,7 +7,6 @@ const productSchema = Schema(
     sku: {
       type: String,
       required: true,
-      unique: true,
     },
     name: {
       type: String,
@@ -47,8 +46,9 @@ const productSchema = Schema(
   { timestamps: true },
 );
 
-productSchema.methods.toJSON = () => {
-  const obj = this._id;
+productSchema.methods.toJSON = function () {
+  const obj = this.toObject();
+  console.log("obj", this);
   delete obj.createdAt;
   delete obj.updatedAt;
   delete obj.__v;
