@@ -57,6 +57,7 @@ authController.checkAdminPermission = async (req, res, next) => {
     if (user?.level !== "admin") {
       throw new Error("관리자 권한이 없습니다.");
     }
+    req.user = user;
     next();
   } catch (error) {
     res

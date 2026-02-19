@@ -17,4 +17,5 @@ router.get(
   productController.getProducts,
 );
 
+router.get("/customer", productController.getProductsByCustomer);
 module.exports = router;
