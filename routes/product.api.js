@@ -18,4 +18,17 @@ router.get(
 );
 
 router.get("/customer", productController.getProductsByCustomer);
+router.get("/:id", productController.getProductById);
+router.delete(
+  "/:id",
+  authController.authenticate,
+  authController.checkAdminPermission,
+  productController.deleteProduct,
+);
+router.put(
+  "/:id",
+  authController.authenticate,
+  authController.checkAdminPermission,
+  productController.updateProduct,
+);
 module.exports = router;

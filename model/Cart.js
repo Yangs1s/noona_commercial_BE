@@ -9,22 +9,24 @@ const cartSchema = Schema(
       ref: "User",
       required: true,
     },
-    itmes: {
-      productId: {
-        type: mongoose.ObjectId,
-        ref: "Product",
-        required: true,
+    items: [
+      {
+        productId: {
+          type: mongoose.ObjectId,
+          ref: "Product",
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          default: 1,
+        },
+        size: {
+          type: String,
+          required: true,
+        },
       },
-      quantity: {
-        type: Number,
-        required: true,
-        default: 1,
-      },
-      size: {
-        type: String,
-        required: true,
-      },
-    },
+    ],
   },
   { timestamps: true },
 );
