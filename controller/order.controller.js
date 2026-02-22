@@ -1,5 +1,6 @@
 const orderController = {};
 const Order = require("../model/Order");
+const Cart = require("../model/Cart");
 const productController = require("./product.controller");
 const randomStringGenerator = require("../utils/randomStringGenerator");
 orderController.createOrder = async (req, res) => {
@@ -28,6 +29,7 @@ orderController.createOrder = async (req, res) => {
       orderNum: randomStringGenerator(),
     });
     await order.save();
+    await Cart.findOneAndUpdate({ userId }, { items: [] });
     res.status(200).json({
       status: "주문 생성 성공",
       orderNumber: order.orderNum,
