@@ -18,8 +18,8 @@ const LOCAL_DB_ADDRESS = process.env.LOCAL_DB_ADDRESS;
 const AWS_DB_ADDRESS = process.env.AWS_DB_ADDRESS;
 
 mongoose
-  .connect(LOCAL_DB_ADDRESS)
-  // .connect(AWS_DB_ADDRESS)
+  // .connect(LOCAL_DB_ADDRESS)
+  .connect(AWS_DB_ADDRESS)
   .then(() => {
     console.log("Connected to MongoDB");
   })
