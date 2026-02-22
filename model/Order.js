@@ -10,26 +10,28 @@ const orderSchema = Schema(
       ref: User,
       required: true,
     },
-    items: {
-      productId: {
-        type: mongoose.ObjectId,
-        ref: Product,
-        required: true,
+    items: [
+      {
+        productId: {
+          type: mongoose.ObjectId,
+          ref: Product,
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          default: 1,
+        },
+        size: {
+          type: String,
+          required: true,
+        },
+        price: {
+          type: Number,
+          required: true,
+        },
       },
-      quantity: {
-        type: Number,
-        required: true,
-        default: 1,
-      },
-      size: {
-        type: String,
-        required: true,
-      },
-      price: {
-        type: Number,
-        required: true,
-      },
-    },
+    ],
     totalPrice: {
       type: Number,
       required: true,
@@ -40,12 +42,15 @@ const orderSchema = Schema(
       default: "preparing",
     },
     contact: {
-      type: String,
+      type: Object,
       required: true,
     },
     shipTo: {
-      type: String,
+      type: Object,
       required: true,
+    },
+    orderNum: {
+      type: String,
     },
   },
   { timestamps: true },
@@ -59,5 +64,7 @@ orderSchema.methods.toJSON = async function () {
   delete obj.__v;
   return obj;
 };
+
+const Order = mongoose.model("Order", orderSchema);
 
 module.exports = Order;

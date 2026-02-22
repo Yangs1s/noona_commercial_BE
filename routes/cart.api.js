@@ -8,7 +8,7 @@ router.post("/create", authController.authenticate, cartController.createCart);
 router.get("/get", authController.authenticate, cartController.getCart);
 router.put("/update", authController.authenticate, cartController.updateCart);
 router.delete(
-  "/delete",
+  "/delete/:id",
   authController.authenticate,
   cartController.deleteCart,
 );

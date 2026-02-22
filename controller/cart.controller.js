@@ -83,14 +83,20 @@ cartController.updateCart = async (req, res) => {
 cartController.deleteCart = async (req, res) => {
   try {
     const { userId } = req;
-    const { productId } = req.body;
-
-    await Cart.findOneAndUpdate(
+    const { id } = req.params;
+    const cart = await Cart.findOneAndUpdate(
       { userId },
-      { $pull: { items: { productId } } },
+      { $pull: { items: { _id: id } } },
       { new: true },
-    );
-    res.status(200).json({ status: "장바구니 삭제 성공" });
+    ).populate("items.productId");
+    if (!cart) {
+      throw new Error("장바구니를 찾을 수 없습니다.");
+    }
+    res.status(200).json({
+      status: "장바구니 삭제 성공",
+      data: cart.items,
+      cartQty: cart.items.length,
+    });
   } catch (error) {
     res
       .status(400)
