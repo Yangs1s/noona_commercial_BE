@@ -1,6 +1,7 @@
 const orderController = {};
 const Order = require("../model/Order");
 const Cart = require("../model/Cart");
+const Product = require("../model/Product");
 const productController = require("./product.controller");
 const randomStringGenerator = require("../utils/randomStringGenerator");
 orderController.createOrder = async (req, res) => {
@@ -39,4 +40,86 @@ orderController.createOrder = async (req, res) => {
   }
 };
 
+orderController.getOrder = async (req, res) => {
+  try {
+    const { userId } = req;
+    const { cursor, period } = req.query;
+    // 날짜 기준 정렬
+    const query = { userId };
+    if (cursor) {
+      query.createdAt = { $lt: cursor };
+    }
+    if (period) {
+      const date = new Date();
+      const month = period === "1m" ? 1 : 3;
+      date.setMonth(date.getMonth() - month);
+      query.createdAt = { ...query.createdAt, $gte: date };
+    }
+    const orders = await Order.find(query).sort({ createdAt: -1 }).limit(10);
+
+    res.status(200).json({
+      status: "주문 목록 조회 성공",
+      data: orders,
+      nextCursor:
+        orders.length > 0 ? orders[orders.length - 1].createdAt : null,
+    });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ status: "주문 목록 조회 실패", error: error.message });
+  }
+};
+
+orderController.getAdminOrder = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, query = "" } = req.query;
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    // product 검색 조건
+    const searchProductCond = query
+      ? { name: { $regex: query, $options: "i" } }
+      : {};
+
+    const searchProduct = await Product.find(searchProductCond);
+
+    // 검색결과 없을떄
+
+    const productIds = searchProduct.map((product) => product._id);
+    const cond = query
+      ? {
+          "items.productId": {
+            $in: productIds,
+          },
+        }
+      : {};
+    const skip = (pageNum - 1) * limitNum;
+    const order = await Order.find(cond).skip(skip).limit(limitNum);
+    const totalCount = await Order.countDocuments(cond);
+    res.status(200).json({
+      status: "주문 목록 조회 성공",
+      data: query && searchProduct.length === 0 ? [] : order,
+      currentPage: pageNum,
+      totalCount,
+    });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ status: "주문 목록 조회 실패", error: error.message });
+  }
+};
+
+orderController.changeOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    await Order.findByIdAndUpdate(id, { status }, { new: true });
+
+    return res.status(200).json({ status: "배송 상태 수정 성공" });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ status: "주문상태 변경 실패", error: error.message });
+  }
+};
 module.exports = orderController;

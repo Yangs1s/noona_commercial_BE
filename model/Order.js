@@ -57,11 +57,8 @@ const orderSchema = Schema(
   { timestamps: true },
 );
 
-orderSchema.methods.toJSON = async function () {
+orderSchema.methods.toJSON = function () {
   const obj = this.toObject();
-  delete obj.createdAt;
-  delete obj.updatedAt;
-  delete obj.password;
   delete obj.__v;
   return obj;
 };
