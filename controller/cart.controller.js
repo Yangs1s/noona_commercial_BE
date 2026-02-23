@@ -48,6 +48,20 @@ cartController.getCart = async (req, res) => {
   }
 };
 
+cartController.getCartQty = async (req, res) => {
+  try {
+    const { userId } = req;
+    const cart = await Cart.findOne({ userId }).populate("items.productId");
+    res
+      .status(200)
+      .json({ status: "장바구니 조회 성공", data: cart.items.length });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ status: "장바구니 조회 실패", error: error.message });
+  }
+};
+
 cartController.updateCart = async (req, res) => {
   try {
     const { userId } = req;

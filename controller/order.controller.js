@@ -29,7 +29,7 @@ orderController.createOrder = async (req, res) => {
       orderNum: randomStringGenerator(),
     });
     await order.save();
-    await Cart.findOneAndUpdate({ userId }, { items: [] });
+    // save후에 카트를 비운다.
     res.status(200).json({
       status: "주문 생성 성공",
       orderNumber: order.orderNum,

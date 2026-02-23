@@ -6,6 +6,7 @@ const authController = require("../controller/auth.controller");
 
 router.post("/create", authController.authenticate, cartController.createCart);
 router.get("/get", authController.authenticate, cartController.getCart);
+router.get("/qty", authController.authenticate, cartController.getCartQty);
 router.put("/update", authController.authenticate, cartController.updateCart);
 router.delete(
   "/delete/:id",
