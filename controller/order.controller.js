@@ -55,7 +55,10 @@ orderController.getOrder = async (req, res) => {
       date.setMonth(date.getMonth() - month);
       query.createdAt = { ...query.createdAt, $gte: date };
     }
-    const orders = await Order.find(query).sort({ createdAt: -1 }).limit(10);
+    const orders = await Order.find(query)
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .populate("items.productId");
 
     res.status(200).json({
       status: "주문 목록 조회 성공",
@@ -99,6 +102,7 @@ orderController.getAdminOrder = async (req, res) => {
       status: "주문 목록 조회 성공",
       data: query && searchProduct.length === 0 ? [] : order,
       currentPage: pageNum,
+      totalPages: Math.ceil(totalCount / limit),
       totalCount,
     });
   } catch (error) {

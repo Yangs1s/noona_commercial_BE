@@ -1,9 +1,12 @@
 const User = require("../model/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
 const authController = {};
 require("dotenv").config();
 
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 authController.loginwithMail = async (req, res) => {
   try {
     let { email, password } = req.body;
@@ -15,10 +18,10 @@ authController.loginwithMail = async (req, res) => {
       const isMatch = bcrypt.compareSync(password, user.password);
       if (isMatch) {
         const token = await user.generateToken();
-        console.log("token", token);
+
         return res
           .status(200)
-          .json({ status: "로그인 성공", user: user, token: token });
+          .json({ status: "로그인 성공", user: user, accessToken: token });
       }
     }
     throw new Error("아이디 혹은 비밀번호가 일치하지 않습니다.");
@@ -26,7 +29,41 @@ authController.loginwithMail = async (req, res) => {
     res.status(400).json({ status: "로그인 실패", error: error.message });
   }
 };
+authController.loginwithGoogle = async (req, res) => {
+  try {
+    const { token } = req.body;
+    const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: GOOGLE_CLIENT_ID,
+    });
+
+    const { email, name } = ticket.getPayload();
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      const randomPassword = "" + Math.floor(Math.random() * 1000000);
+      const salt = bcrypt.genSaltSync(10);
+      const hashedPassword = bcrypt.hashSync(randomPassword, salt);
+
+      user = new User({
+        email,
+        name,
+        password: hashedPassword,
+        level: "customer",
+      });
+      await user.save();
+    }
+    const userToken = await user.generateToken();
+
+    return res
+      .status(200)
+      .json({ status: "로그인 성공", user: user, token: userToken });
+  } catch (error) {
+    res.status(400).json({ status: "로그인 실패", error: error.message });
+  }
+};
 authController.authenticate = async (req, res, next) => {
   try {
     const token = req.headers.authorization.replace("Bearer ", ""); // Bearer <token>
@@ -65,4 +102,5 @@ authController.checkAdminPermission = async (req, res, next) => {
       .json({ status: "관리자 권한이 없습니다.", error: error.message });
   }
 };
+
 module.exports = authController;
