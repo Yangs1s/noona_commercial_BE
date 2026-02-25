@@ -386,7 +386,7 @@ productController.checkItemStock = async (itemList) => {
       try {
         const insufficientStock = [];
         // 재고 확인 로직
-        console.log(itemList);
+        // 같은 아이디에서 사이즈만 다르게 처리하니까 순차적처리가 맞다고 봐서 for-of 사용
         for (const item of itemList) {
           const stockCheck = await productController.checkStock(item);
           if (!stockCheck.isVerify) {
