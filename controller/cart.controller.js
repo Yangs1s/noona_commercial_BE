@@ -40,7 +40,7 @@ cartController.getCart = async (req, res) => {
   try {
     const { userId } = req;
     const cart = await Cart.findOne({ userId }).populate("items.productId");
-    res.status(200).json({ status: "장바구니 조회 성공", data: cart.items });
+    res.status(200).json({ status: "장바구니 조회 성공", data: cart?.items ?? [] });
   } catch (error) {
     res
       .status(400)
@@ -51,10 +51,10 @@ cartController.getCart = async (req, res) => {
 cartController.getCartQty = async (req, res) => {
   try {
     const { userId } = req;
-    const cart = await Cart.findOne({ userId }).populate("items.productId");
+    const cart = await Cart.findOne({ userId });
     res
       .status(200)
-      .json({ status: "장바구니 조회 성공", data: cart.items.length });
+      .json({ status: "장바구니 조회 성공", data: cart?.items.length ?? 0 });
   } catch (error) {
     res
       .status(400)
