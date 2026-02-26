@@ -57,7 +57,7 @@ orderController.getOrder = async (req, res) => {
     }
     const orders = await Order.find(query)
       .sort({ createdAt: -1 })
-      .limit(10)
+      .limit(5)
       .populate("items.productId");
 
     res.status(200).json({
