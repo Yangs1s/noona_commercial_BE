@@ -152,6 +152,7 @@ productController.getProductById = async (req, res) => {
   }
 };
 
+// 재고 확인만 (차감 없음)
 productController.checkStock = async (item) => {
   const product = await Product.findById(item.productId);
   if (!product) {
@@ -166,21 +167,33 @@ productController.checkStock = async (item) => {
     };
   }
 
+  return { isVerify: true };
+};
+
+// 재고 차감 (checkStock 통과 후에만 호출)
+productController.deductStock = async (item) => {
+  const product = await Product.findById(item.productId);
+  const stockItem = product.stock.find((s) => s.size === item.size);
   stockItem.quantity -= item.quantity;
   product.markModified("stock");
   await product.save();
-
-  return { isVerify: true };
 };
 
 productController.checkItemStock = async (itemList) => {
   try {
+    // 1단계: 전체 재고 확인 (차감 없음)
     const insufficientStock = [];
-    // 같은 상품의 다른 사이즈 동시 처리 시 race condition 방지를 위해 순차 처리
     for (const item of itemList) {
       const stockCheck = await productController.checkStock(item);
       if (!stockCheck.isVerify) {
         insufficientStock.push({ item, message: stockCheck.message });
+      }
+    }
+
+    // 2단계: 모두 통과한 경우에만 차감
+    if (insufficientStock.length === 0) {
+      for (const item of itemList) {
+        await productController.deductStock(item);
       }
     }
 
