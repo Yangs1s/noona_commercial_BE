@@ -78,31 +78,36 @@ orderController.getAdminOrder = async (req, res) => {
     const { page = 1, limit = 10, query = "" } = req.query;
     const pageNum = Number(page);
     const limitNum = Number(limit);
-    // product 검색 조건
+    // 상품명 검색 조건
     const searchProductCond = query
       ? { name: { $regex: query, $options: "i" } }
       : {};
-
     const searchProduct = await Product.find(searchProductCond);
-
-    // 검색결과 없을떄
-
     const productIds = searchProduct.map((product) => product._id);
-    const cond = query
-      ? {
-          "items.productId": {
-            $in: productIds,
-          },
-        }
-      : {};
+
+    // 주문번호 OR 상품명으로 검색
+    const searchConditions = query
+      ? [
+          { orderNum: { $regex: query, $options: "i" } },
+          ...(productIds.length > 0
+            ? [{ "items.productId": { $in: productIds } }]
+            : []),
+        ]
+      : [];
+    const cond = searchConditions.length > 0 ? { $or: searchConditions } : {};
+
     const skip = (pageNum - 1) * limitNum;
-    const order = await Order.find(cond).skip(skip).limit(limitNum);
+    const order = await Order.find(cond)
+      .skip(skip)
+      .limit(limitNum)
+      .populate("items.productId");
     const totalCount = await Order.countDocuments(cond);
+
     res.status(200).json({
       status: "주문 목록 조회 성공",
-      data: query && searchProduct.length === 0 ? [] : order,
+      data: order,
       currentPage: pageNum,
-      totalPages: Math.ceil(totalCount / limit),
+      totalPages: Math.ceil(totalCount / limitNum),
       totalCount,
     });
   } catch (error) {
