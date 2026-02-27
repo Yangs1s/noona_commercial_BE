@@ -100,7 +100,8 @@ orderController.getAdminOrder = async (req, res) => {
     const order = await Order.find(cond)
       .skip(skip)
       .limit(limitNum)
-      .populate("items.productId");
+      .populate("items.productId")
+      .populate("userId", "email");
     const totalCount = await Order.countDocuments(cond);
 
     res.status(200).json({
